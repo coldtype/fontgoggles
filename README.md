@@ -1,3 +1,5 @@
+# This is a modified version of FontGoggles, for use with Coldtype
+
 ![FontGoggles Icon](docs/images/icon.png)
 
 # FontGoggles

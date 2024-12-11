@@ -23,10 +23,11 @@ with open('Lib/fontgoggles/__init__.py', "r") as fg_init:
     assert match is not None, "fontgoggles.__version__ not found"
     fg_version = match.group(1)
 
+fg_version = "0.0.1"
 
 setup(
     name="coldtype-fontgoggles",
-    use_scm_version={"write_to": "Lib/fontgoggles/_version.py"},
+    #use_scm_version={"write_to": "Lib/fontgoggles/_version.py"},
     version=fg_version,
     description="coldtype-fontgoggles is a PyPI-enabled version of the main library for the FontGoggles application.",
     author="Just van Rossum",
