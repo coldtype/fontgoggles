@@ -25,13 +25,13 @@ with open('Lib/fontgoggles/__init__.py', "r") as fg_init:
 
 
 setup(
-    name="fontgoggles",
+    name="coldtype-fontgoggles",
     use_scm_version={"write_to": "Lib/fontgoggles/_version.py"},
     version=fg_version,
-    description="fontgoggles is the main library for the FontGoggles application.",
+    description="coldtype-fontgoggles is a PyPI-enabled version of the main library for the FontGoggles application.",
     author="Just van Rossum",
     author_email="justvanrossum@gmail.com",
-    url="https://github.com/justvanrossum/fontgoggles",
+    url="https://github.com/coldtype/fontgoggles",
     package_dir={"": "Lib"},
     packages=find_packages("Lib"),
     package_data={'fontgoggles.mac': ['*.dylib']},
