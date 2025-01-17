@@ -170,7 +170,7 @@ class HBShape:
         buf.add_str(str(text))  # add_str() does not accept str subclasses
         buf.guess_segment_properties()
 
-        buf.cluster_level = hb.BufferClusterLevel.MONOTONE_CHARACTERS
+        buf.cluster_level = hb.BufferClusterLevel.DEFAULT
 
         if direction is not None:
             buf.direction = direction
