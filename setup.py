@@ -23,7 +23,7 @@ with open('Lib/fontgoggles/__init__.py', "r") as fg_init:
     assert match is not None, "fontgoggles.__version__ not found"
     fg_version = match.group(1)
 
-fg_version = "1.8.4ct2"
+fg_version = "1.8.4.2"
 
 setup(
     name="coldtype-fontgoggles",
