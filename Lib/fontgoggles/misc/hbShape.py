@@ -156,7 +156,7 @@ class HBShape:
 
     def shape(self, text, *, features=None, varLocation=None,
               direction=None, language=None, script=None,
-              clusterLevel=hb.BufferClusterLevel.MONOTONE_CHARACTERS):
+              clusterLevel=None):
         if features is None:
             features = {}
         if varLocation is None:
@@ -171,7 +171,7 @@ class HBShape:
         buf.add_str(str(text))  # add_str() does not accept str subclasses
         buf.guess_segment_properties()
 
-        buf.cluster_level = clusterLevel
+        buf.cluster_level = clusterLevel if clusterLevel is not None else hb.BufferClusterLevel.MONOTONE_CHARACTERS
 
         if direction is not None:
             buf.direction = direction
