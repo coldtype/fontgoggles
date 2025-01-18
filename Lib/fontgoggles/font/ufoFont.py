@@ -22,7 +22,7 @@ from ..compile.compilerPool import compileUFOToBytes
 from ..compile.ufoCompiler import fetchGlyphInfo
 from ..misc.hbShape import HBShape
 from ..misc.properties import cachedProperty
-import fontgoggles.misc.platform as platform
+from ..misc.platform import platform
 
 
 class UFOFont(BaseFont):
@@ -151,9 +151,9 @@ class UFOFont(BaseFont):
         return glyph
 
     def _addOutlinePathToGlyph(self, glyph):
-        penwrapper = platform.platform.PenWrapper(self.glyphSet)
-        glyph.draw(penwrapper.pen)
-        glyph.outline = penwrapper.getOutline()
+        pen = platform.Pen(self.glyphSet)
+        glyph.draw(pen)
+        glyph.outline = pen.path
 
     def _getHorizontalAdvance(self, glyphName):
         glyph = self._getGlyph(glyphName)
@@ -258,9 +258,9 @@ class NotDefGlyph:
         pass
 
     def getOutline(self):
-        penwrapper = platform.platform.PenWrapper(None)
-        self.draw(penwrapper.pen)
-        return penwrapper.getOutline()
+        pen = platform.Pen(None)
+        self.draw(pen)
+        return pen.path
 
 
 class Glyph(GLIFGlyph):

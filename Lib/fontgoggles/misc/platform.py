@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from fontTools.pens.recordingPen import RecordingPen
 
 """
@@ -53,16 +54,8 @@ class PlatformCocoa:
             palette=colorPalette,
             textColor=defaultColor,
         )
-
-    class PenWrapper:
-        def __init__(self, glyphSet, path=None):
-            self.pen = CocoaPen(glyphSet, path=path)
-
-        def draw(self, pen):
-            self.pen.draw(pen)
-
-        def getOutline(self):
-            return self.pen.path
+    
+    Pen = CocoaPen
 
 
 class PlatformGeneric:
@@ -89,26 +82,28 @@ class PlatformGeneric:
     @staticmethod
     def drawCOLRv1Glyph(colorFont, glyphName, colorPalette, defaultColor):
         raise NotImplementedError()
-
-    class PenWrapper:
-        def __init__(self, glyphSet, path=None):
-            self.pen = RecordingPen()
-
-        def draw(self, pen):
-            self.pen.draw(pen)
-
-        def getOutline(self):
-            return self.pen
+    
+    class Pen(RecordingPen):
+        def __init__(self, glyphSet): # to match CocoaPen constructor
+            super().__init__()
+        
+        @property
+        def path(self):
+            return self
 
 
-platform = PlatformCocoa if CAN_COCOA else PlatformGeneric
+platform = SimpleNamespace()
+
+_platform = PlatformCocoa if CAN_COCOA else PlatformGeneric
+platform.__dict__.update(**_platform.__dict__)
 
 
 def setUseCocoa(onOff):
     global platform
     if onOff:
         assert CAN_COCOA
-    platform = PlatformCocoa if onOff else PlatformGeneric
+    _platform = PlatformCocoa if onOff else PlatformGeneric
+    platform.__dict__.update(**_platform.__dict__)
 
 
 def getUseCocoa():

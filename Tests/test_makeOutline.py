@@ -2,7 +2,7 @@ import sys
 import pytest
 from fontTools.ttLib import TTFont
 from fontgoggles.font.otfFont import OTFFont
-import fontgoggles.misc.platform as platform
+from fontgoggles.misc.platform import platform
 from testSupport import getFontPath
 
 
@@ -19,12 +19,12 @@ async def test_getOutlinePath():
 
     for glyphName in ["a", "B", "O", "period", "bar", "aring"]:
         p = font._getGlyphOutline(glyphName)
-        penwrapper = platform.platform.PenWrapper(ttfGlyphSet)
-        ttfGlyphSet[glyphName].draw(penwrapper.pen)
+        pen = platform.Pen(ttfGlyphSet)
+        ttfGlyphSet[glyphName].draw(pen)
         # The paths are not identical, due to different rounding
         # of the implied points, and different closepath behavior,
         # so comparing is hard, so we'll settle for a bounding box.
-        assert p.controlPointBounds() == penwrapper.pen.path.controlPointBounds()
+        assert p.controlPointBounds() == pen.path.controlPointBounds()
 
 
 @pytest.mark.asyncio
