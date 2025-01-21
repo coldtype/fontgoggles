@@ -6,6 +6,9 @@ from fontTools.ttLib import TTFont
 import uharfbuzz as hb
 
 
+CLUSTER_LEVEL = hb.BufferClusterLevel.MONOTONE_CHARACTERS
+
+
 class GlyphInfo:
 
     def __init__(self, gid, name, cluster, dx, dy, ax, ay):
@@ -155,8 +158,7 @@ class HBShape:
             return default
 
     def shape(self, text, *, features=None, varLocation=None,
-              direction=None, language=None, script=None,
-              clusterLevel=None):
+              direction=None, language=None, script=None):
         if features is None:
             features = {}
         if varLocation is None:
@@ -171,7 +173,7 @@ class HBShape:
         buf.add_str(str(text))  # add_str() does not accept str subclasses
         buf.guess_segment_properties()
 
-        buf.cluster_level = clusterLevel if clusterLevel is not None else hb.BufferClusterLevel.MONOTONE_CHARACTERS
+        buf.cluster_level = CLUSTER_LEVEL
 
         if direction is not None:
             buf.direction = direction
