@@ -23,7 +23,7 @@ with open('Lib/fontgoggles/__init__.py', "r") as fg_init:
     assert match is not None, "fontgoggles.__version__ not found"
     fg_version = match.group(1)
 
-fg_version = "1.8.4.3"
+fg_version = "1.8.4.4"
 
 setup(
     name="coldtype-fontgoggles",
@@ -42,7 +42,7 @@ setup(
         "uharfbuzz>=0.42.0",
         "python-bidi==0.4.2", # pinned for non-forward-compatibility
         "ufo2ft>=3.2.8",
-        "numpy==2.1.1", # pin numpy for macOS 10.14 compatibility
+        "numpy<=2.1.1", # pin numpy for macOS 10.14 compatibility
         "unicodedata2>=15.1.0",
     ],
     extras_require={
