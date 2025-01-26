@@ -11,6 +11,7 @@ CAN_COCOA = True
 
 try:
     from fontTools.pens.cocoaPen import CocoaPen
+    import objc
 except ImportError:
     CAN_COCOA = False
 
