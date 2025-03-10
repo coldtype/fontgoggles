@@ -10,6 +10,7 @@ so that fontGoggles can function as a platform-agnostic library
 CAN_COCOA = True
 
 try:
+    import objc
     from fontTools.pens.cocoaPen import CocoaPen
     import objc
 except ImportError:
