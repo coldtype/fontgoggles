@@ -14,6 +14,7 @@ try:
     from fontTools.pens.cocoaPen import CocoaPen
 except ImportError:
     CAN_COCOA = False
+    CocoaPen = None
 
 
 class PlatformCocoa:
