@@ -23,7 +23,7 @@ with open('Lib/fontgoggles/__init__.py', "r") as fg_init:
     assert match is not None, "fontgoggles.__version__ not found"
     fg_version = match.group(1)
 
-fg_version = "1.8.4.7b1"
+fg_version = "1.8.4.7b2"
 
 setup(
     name="coldtype-fontgoggles",
@@ -38,14 +38,17 @@ setup(
     package_data={'fontgoggles.mac': ['*.dylib']},
     install_requires=[
         "blackrenderer>=0.6.0",
-        "fonttools[woff,lxml,unicode,ufo,type1]>=4.53.1",
+        "fonttools>=4.53.1",
         "uharfbuzz>=0.42.0",
         "python-bidi==0.4.2", # pinned for non-forward-compatibility
-        #"ufo2ft>=3.2.8",
-        #"numpy",
         "unicodedata2>=15.1.0",
     ],
     extras_require={
+        "more-fonts": [
+            "fonttools[woff,lxml,unicode,ufo,type1]>=4.53.1",
+            "ufo2ft",
+            "numpy"
+        ]
     },
     setup_requires=["setuptools_scm<8.0.0"],
     python_requires=">=3.10",
