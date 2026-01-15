@@ -1,3 +1,4 @@
+import sys
 import pytest
 from fontgoggles.font import getOpener, sniffFontType, sortedFontPathsAndNumbers
 from fontgoggles.misc.textInfo import TextInfo
@@ -206,6 +207,20 @@ openFontsTestData = [
         ['features_test.fea', 'features_test_nested.fea'],
         {},
         "A", ["A"], [1290], None),
+    ('KernBug.designspace',  # https://github.com/justvanrossum/fontgoggles/issues/486
+        {},
+        set(),
+        {'kern'},
+        {'DFLT': set(), 'latn': set()},
+        {'wght': {'defaultValue': 400.0,
+                  'hidden': False,
+                  'maxValue': 700.0,
+                  'minValue': 400.0,
+                  'name': 'Weight'}},
+        ['KernBug-Bold.ufo',
+         'KernBug-Regular.ufo'],
+        {'wght': 400},
+        ".o", ["period", "o"], [590, 600], None),
 ]
 
 @pytest.mark.parametrize("fileName,expectedSortInfo,featuresGSUB,featuresGPOS,scripts,axes,ext,location,text,glyphNames,ax,script",
@@ -227,7 +242,7 @@ async def test_openFonts(fileName,
     numFonts, opener, getSortInfo = getOpener(fontPath)
     assert numFonts(fontPath) == 1
     font = opener(fontPath, 0)
-    await font.load(print)
+    await font.load(sys.stderr.write)
     sortInfo = getSortInfo(fontPath, 0)
     assert sortInfo == expectedSortInfo
     assert font.featuresGSUB == featuresGSUB
@@ -285,6 +300,29 @@ def test_iterFontPathsAndNumbers():
         ('MutatorSansBoldWideMutated.ufoz', 0),
     ]
     assert expectedResults == results
+
+
+fontMetricsTestData = [
+    ("MutatorSansBoldWideMutated.ufo", dict(),          (500, 800, 800, -200)),
+    ('MutatorSans.designspace',        dict(),          (500, 700, 700, -200)),
+    ('MutatorSans.designspace',        dict(wght=100),  (500, 710, 700, -200)),
+    ('MutatorSans.designspace',        dict(wght=1000), (500, 800, 700, -200)),
+    ("MutatorSans.ttf",                dict(),          (500, 700, 700, -200)),
+    ("MutatorSans.ttf",                dict(wght=100),  (500, 710, 700, -200)),
+    ("MutatorSans.ttf",                dict(wght=1000), (500, 800, 700, -200)),
+]
+
+
+@pytest.mark.parametrize("fileName,location,expected", fontMetricsTestData)
+@pytest.mark.asyncio
+async def test_fontMetrics(fileName, location, expected):
+    fontPath = getFontPath(fileName)
+    _, opener, _ = getOpener(fontPath)
+    font = opener(fontPath, 0)
+    await font.load(sys.stderr.write)
+    if location:
+        font.setVarLocation(location)
+    assert expected == font.fontMetrics
 
 
 testDataGetGlyphRun = [

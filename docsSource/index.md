@@ -239,10 +239,11 @@ panels:
 - Show/hide Compile output — ⌘-3
 - Show/hide Formatting options — ⌘-4
 
-With another “View” menu item you can hide or show the font file name labels
-in the Font list:
+There are three more “View” menu items that affect the items in the Font list:
 
 - Show/hide Font File name — ⌘-5
+- Show/hide Font Metrics — ⌘-6
+- Show/hide Baseline — ⌘-7
 
 ![FontGoggles screenshot](images/screenshot_7_hindi.png)
 
@@ -341,7 +342,7 @@ These are examples of valid Unicode literal search terms:
 
 ## System requirements
 
-- macOS 10.10 and higher
+- macOS 10.13 and higher
 
 ## Found a bug or have a question?
 

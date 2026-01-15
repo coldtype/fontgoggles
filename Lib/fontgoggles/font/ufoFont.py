@@ -56,7 +56,7 @@ class UFOFont(BaseFont):
                                      getUnicodesAndAnchors=self._getUnicodesAndAnchors,
                                      includedFeatureFiles=includedFeatureFiles)
 
-        fontData = await compileUFOToBytes(self.fontPath, outputWriter)
+        fontData = await compileUFOToBytes(self.fontPath, True, outputWriter)
 
         f = io.BytesIO(fontData)
         self.ttFont = TTFont(f, lazy=True)
@@ -161,8 +161,8 @@ class UFOFont(BaseFont):
 
     @cachedProperty
     def defaultVerticalAdvance(self):
-        ascender = getattr(self.info, "ascender", None)
-        descender = getattr(self.info, "descender", None)
+        ascender = self.fontMetrics.ascender
+        descender = self.fontMetrics.descender
         if ascender is None or descender is None:
             return self.info.unitsPerEm
         else:
@@ -170,7 +170,7 @@ class UFOFont(BaseFont):
 
     @cachedProperty
     def defaultVerticalOriginY(self):
-        ascender = getattr(self.info, "ascender", None)
+        ascender = self.fontMetrics.ascender
         if ascender is None:
             return self.info.unitsPerEm  # ???
         else:

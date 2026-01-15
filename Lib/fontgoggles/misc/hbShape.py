@@ -66,6 +66,10 @@ def _getVerticalOriginFunc(font, glyphID, shaper):
 _stylisticSets = {f"ss{i:02}" for i in range(1, 21)}
 
 
+_HORIZONTAL_ASCENDER_OS2 = 1331786595  # HB_TAG ('O','a','s','c')
+_HORIZONTAL_DESCENDER_OS2 = 1331983203  # HB_TAG ('O','d','s','c')
+
+
 class HBShape:
 
     @classmethod
@@ -116,13 +120,23 @@ class HBShape:
         else:
             self._funcs = None
 
+    def getFontMetrics(self):
+        xHeight = self.font.get_metric_position(hb.OTMetricsTag.X_HEIGHT)
+        capHeight = self.font.get_metric_position(hb.OTMetricsTag.CAP_HEIGHT)
+        ascender = self.font.get_metric_position(_HORIZONTAL_ASCENDER_OS2)
+        descender = self.font.get_metric_position(_HORIZONTAL_DESCENDER_OS2)
+        return xHeight, capHeight, ascender, descender
+
+    def setVarLocation(self, varLocation):
+        self.font.set_variations(varLocation)
+
     def getFeatures(self, otTableTag):
         features = set()
-        for scriptIndex, script in enumerate(hb.ot_layout_table_get_script_tags(self.face, otTableTag)):
-            langIdices = list(range(len(hb.ot_layout_script_get_language_tags(self.face, otTableTag, scriptIndex))))
+        for scriptIndex, script in enumerate(self.face.get_table_script_tags(otTableTag)):
+            langIdices = list(range(len(self.face.get_script_language_tags(otTableTag, scriptIndex))))
             langIdices.append(0xFFFF)
             for langIndex in langIdices:
-                features.update(hb.ot_layout_language_get_feature_tags(self.face, otTableTag, scriptIndex, langIndex))
+                features.update(self.face.get_language_feature_tags(otTableTag, scriptIndex, langIndex))
         return features
 
     def getStylisticSetNames(self):
@@ -140,15 +154,17 @@ class HBShape:
             if tag in tags and tag not in names:
                 feaParams = feature.Feature.FeatureParams
                 if feaParams is not None:
-                    nameRecord = nameTable.getName(feaParams.UINameID, 3, 1)
-                    if nameRecord is not None:
-                        names[tag] = nameRecord.toUnicode()
+                    for langID in [0x0409, None]:
+                        nameRecord = nameTable.getName(feaParams.UINameID, 3, 1, langID)
+                        if nameRecord is not None:
+                            names[tag] = nameRecord.toUnicode()
+                            break
         return names
 
     def getScriptsAndLanguages(self, otTableTag):
         scriptsAndLanguages = {}
-        for scriptIndex, script in enumerate(hb.ot_layout_table_get_script_tags(self.face, otTableTag)):
-            scriptsAndLanguages[script] = set(hb.ot_layout_script_get_language_tags(self.face, otTableTag, scriptIndex))
+        for scriptIndex, script in enumerate(self.face.get_table_script_tags(otTableTag)):
+            scriptsAndLanguages[script] = set(self.face.get_script_language_tags(otTableTag, scriptIndex))
         return scriptsAndLanguages
 
     def getGlyphID(self, glyphName, default=0):

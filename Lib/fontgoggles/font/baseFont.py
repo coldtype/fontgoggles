@@ -1,6 +1,15 @@
+from typing import Any, NamedTuple
+
 from ..misc.properties import cachedProperty
 from ..misc.hbShape import characterGlyphMapping
 from . import mergeScriptsAndLanguages
+
+
+class FontMetrics(NamedTuple):
+    xHeight: int
+    capHeight: int
+    ascender: int
+    descender: int
 
 
 class BaseFont:
@@ -54,6 +63,10 @@ class BaseFont:
     def unitsPerEm(self):
         return self.ttFont["head"].unitsPerEm
 
+    @property
+    def fontMetrics(self):
+        return FontMetrics(*self.shaper.getFontMetrics())
+
     @cachedProperty
     def colorPalettes(self):
         return None
@@ -84,12 +97,21 @@ class BaseFont:
         name = self.ttFont["name"]
         axes = {}
         for axis in fvar.axes:
-            axisDict = dict(name=str(name.getName(axis.axisNameID, 3, 1)),
-                            minValue=axis.minValue,
-                            defaultValue=axis.defaultValue,
-                            maxValue=axis.maxValue,
-                            hidden=bool(axis.flags & 0x0001))
-            axes[axis.axisTag] = axisDict
+            axisDict = axes.get(axis.axisTag)
+            if axisDict is None:
+                axisDict = dict(name=str(name.getName(axis.axisNameID, 3, 1)),
+                                minValue=axis.minValue,
+                                defaultValue=axis.defaultValue,
+                                maxValue=axis.maxValue,
+                                hidden=bool(axis.flags & 0x0001))
+                axes[axis.axisTag] = axisDict
+            else:
+                # We've seen this axis before, this font may use duplicate
+                # axis tags to get non-linear interpolation. We must assume
+                # all duplicate axes have the same range, but they may have
+                # different "hidden" settings. Our final axis should not be
+                # hidden unless all duplicates are hidden as well.
+                axisDict["hidden"] = axisDict["hidden"] and bool(axis.flags & 0x0001)
         return axes
 
     def getGlyphRunFromTextInfo(self, textInfo, colorPalettesIndex=0, **kwargs):
@@ -103,7 +125,7 @@ class BaseFont:
         else:
             colorPalette = self.colorPalettes[colorPalettesIndex]
 
-        glyphs = GlyphsRun(len(text), self.unitsPerEm, direction in ("TTB", "BTT"), colorPalette)
+        glyphs = GlyphsRun(len(text), self.unitsPerEm, direction in ("TTB", "BTT"), self.fontMetrics, colorPalette)
 
         for segmentText, segmentScript, segmentBiDiLevel, firstCluster in textInfo.segments:
             if script is not None:
@@ -167,16 +189,16 @@ class BaseFont:
         raise NotImplementedError()
 
     def varLocationChanged(self, varLocation):
-        # Optional override
-        pass
+        self.shaper.setVarLocation(varLocation)
 
 
 class GlyphsRun(list):
 
-    def __init__(self, numChars, unitsPerEm, vertical, colorPalette=None):
+    def __init__(self, numChars, unitsPerEm, vertical, fontMetrics=None, colorPalette=None):
         self.numChars = numChars
         self.unitsPerEm = unitsPerEm
         self.vertical = vertical
+        self.fontMetrics = fontMetrics
         self._glyphToChars = None
         self._charToGlyphs = None
         self.endPos = (0, 0)

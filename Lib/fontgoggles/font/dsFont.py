@@ -5,6 +5,7 @@ import io
 import os
 import pathlib
 import pickle
+import re
 import sys
 import tempfile
 from types import SimpleNamespace
@@ -58,7 +59,7 @@ class DSFont(BaseFont):
             ufosToCompile = []
             ttPaths = []
             outputs = []
-            coros = []
+            compileJobs = []
             self._sourceFiles = defaultdict(list)
             self._includedFeatureFiles = defaultdict(list)
             previousUFOs = self._ufos
@@ -66,7 +67,16 @@ class DSFont(BaseFont):
             previousSourceData = self._sourceFontData
             self._sourceFontData = {}
 
-            for source in self.doc.sources:
+            sourceFeatures = []
+
+            # for the optimizeFeatureCompilation check we need the first source
+            # to be the default
+            sources = sorted(
+                self.doc.sources, key=lambda source: source != self.doc.default
+            )
+            assert sources[0] == self.doc.default
+
+            for source in sources:
                 sourceKey = (source.path, source.layerName)
                 self._sourceFiles[pathlib.Path(source.path)].append(sourceKey)
                 ufoState = previousUFOs.get(sourceKey)
@@ -89,6 +99,8 @@ class DSFont(BaseFont):
                     self._includedFeatureFiles[includedFeaFile].append(sourceKey)
                 self._ufos[sourceKey] = ufoState
 
+                sourceFeatures.append(normalizeFeatureText(ufoState.reader.readFeatures()))
+
                 if source.layerName is not None:
                     continue
 
@@ -104,7 +116,20 @@ class DSFont(BaseFont):
                     ttPaths.append(ttPath)
                     output = io.StringIO()
                     outputs.append(output)
-                    coros.append(compileUFOToPath(source.path, ttPath, output.write))
+                    compileJobs.append((source.path, ttPath))
+
+            optimizeFeatureCompilation = (
+                # all identical
+                all(t == sourceFeatures[0] for t in sourceFeatures)
+                or
+                # all empty except (maybe) the default
+                all(not t for t in sourceFeatures[1:])
+            )
+
+            coros = [
+                compileUFOToPath(sourcePath, ttPath, not optimizeFeatureCompilation, output.write)
+                for sourcePath, ttPath in compileJobs
+            ]
 
             # print(f"compiling {len(coros)} fonts")
             errors = await asyncio.gather(*coros, return_exceptions=True)
@@ -133,7 +158,9 @@ class DSFont(BaseFont):
                 # self.ttFont and self.shaper are still up-to-date
                 return
 
-            vfFontData = await compileDSToBytes(self.fontPath, self.fontNumber, ttFolder, outputWriter)
+            vfFontData = await compileDSToBytes(
+                self.fontPath, self.fontNumber, ttFolder, optimizeFeatureCompilation, outputWriter
+            )
 
         f = io.BytesIO(vfFontData)
         self.ttFont = TTFont(f, lazy=True)
@@ -199,8 +226,8 @@ class DSFont(BaseFont):
 
     @cachedProperty
     def defaultVerticalAdvance(self):
-        ascender = getattr(self.defaultInfo, "ascender", None)
-        descender = getattr(self.defaultInfo, "descender", None)
+        ascender = self.fontMetrics.ascender
+        descender = self.fontMetrics.descender
         if ascender is None or descender is None:
             return self.defaultInfo.unitsPerEm
         else:
@@ -208,13 +235,14 @@ class DSFont(BaseFont):
 
     @cachedProperty
     def defaultVerticalOriginY(self):
-        ascender = getattr(self.defaultInfo, "ascender", None)
+        ascender = self.fontMetrics.ascender
         if ascender is None:
             return self.defaultInfo.unitsPerEm  # ???
         else:
             return ascender
 
     def varLocationChanged(self, varLocation):
+        super().varLocationChanged(varLocation)
         self._normalizedLocation = normalizeLocation(self.doc, varLocation or {})
 
     def _getVarGlyph(self, glyphName):
@@ -536,3 +564,14 @@ def normalizeLocation(doc, location):
         ]
         new[axis.tag] = normalizeValue(value, triple)
     return new
+
+
+def normalizeFeatureText(text):
+    assert isinstance(text, str)
+
+    # Strip comments
+    text = re.sub("(?m)#.*$", "", text or "")
+    # Strip extraneous whitespace
+    text = re.sub(r"\s+", " ", text)
+
+    return text

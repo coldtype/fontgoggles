@@ -1,7 +1,32 @@
 # Changelog for FontGoggles
 
-## [1.8.8] - 2025-??-??
+## [1.9.2] - 2026-01-??
 
+- Added option to show the baseline, seperately from the other font metrics. Contributed by Khaled Hosny. ([PR 512](https://github.com/justvanrossum/fontgoggles/pull/512))
+- Fixed "View" menu item titles: for toggle items, reflect the current state with Show/Hide. This fixes a regression that went unnoticed for quite a while. ([Issue 513](https://github.com/justvanrossum/fontgoggles/issues/513), [PR 514](https://github.com/justvanrossum/fontgoggles/pull/514))
+
+## [1.9.1] - 2025-12-29
+
+- Improve "hidden axis" behavior when multiple axes exist with the same tag (for non-linear-interpolation purposes). [PR 510](https://github.com/justvanrossum/fontgoggles/pull/510)
+- Update HarfBuzz to 12.3.0 (via uharfbuzz 0.53.2)
+
+## [1.9.0] - 2025-12-25
+
+- Add option to show font metrics (ascender, descender, x-height, cap-height). There is a new menu item under “View”: Show Font Metrics (command-6). Contributed by Simon Cozens and Khaled Hosny ([Issue 235](https://github.com/justvanrossum/fontgoggles/issues/235), [PR 507](https://github.com/justvanrossum/fontgoggles/pull/507))
+- Updated to Unicode 17
+- Updated OpenType tag descriptions
+
+## [1.8.7] - 2025-06-10
+
+- Synchronize feature compilation strategy with fontmake. This enables Variable Features, and fixes different behavior between fontmake and FontGoggles. ([Issue 486](https://github.com/justvanrossum/fontgoggles/issues/486), [PR 487](https://github.com/justvanrossum/fontgoggles/pull/487))
+- Default to "English" when retrieving a name for (say) a stylistic set. ([Issue 483](https://github.com/justvanrossum/fontgoggles/issues/483), [PR 484](https://github.com/justvanrossum/fontgoggles/pull/484))
+
+## [1.8.6] - 2025-04-14
+
+- Updated language, script and feature tags to OpenType 1.9.1. Thank you Denis Moyogo Jacquerye. ([PR 477](https://github.com/justvanrossum/fontgoggles/pull/477) and [PR 478](https://github.com/justvanrossum/fontgoggles/pull/478))
+- Updated `uharfbuzz` to 0.49.0 and `HarfBuzz` to 11.0.1. This reinstates support for the experimental `VARC` table, which accidentally got broken.
+- Updated `ufo2ft` to 3.4.2
+- Updated `fonttools` to 4.57.0
 - Made the core FontGoggles non-UI library code usable on platforms other than macOS. Contributed by Rob Stenson. ([PR 451](https://github.com/justvanrossum/fontgoggles/pull/451))
 
 ## [1.8.5] - 2025-01-13
@@ -11,7 +36,7 @@
 ## [1.8.4] - 2025-01-11
 
 - Update to Unicode 16.0
-- Update to ufo2ft to 3.4.0
+- Update `ufo2ft` to 3.4.0
 - Update `HarfBuzz` to 10.2.0
 - Update `uharfbuzz` to 0.45.0
 
