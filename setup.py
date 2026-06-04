@@ -45,9 +45,8 @@ setup(
     ],
     extras_require={
         "more-fonts": [
-            "fonttools[woff,lxml,unicode,ufo,type1]>=4.53.1",
             "ufo2ft",
-            "numpy"
+            #"numpy" # taking this out, not sure why it was there?
         ]
     },
     setup_requires=["setuptools_scm<8.0.0"],
