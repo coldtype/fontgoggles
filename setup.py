@@ -45,7 +45,7 @@ setup(
     ],
     extras_require={
         "more-fonts": [
-            "ufo2ft",
+            "ufo2ft==3.8.1",
             #"numpy" # taking this out, not sure why it was there?
         ]
     },
